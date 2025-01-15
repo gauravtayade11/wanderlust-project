@@ -1,3 +1,4 @@
+
 pipeline {
     agent any
     tools {
@@ -64,15 +65,15 @@ pipeline {
                 // }
             }
         }
-        stage("Docker Build"){
-            steps{
-                dir('backend'){
+        stage("Docker Build") {
+            steps {
+                dir('backend') {
                     echo "Building Backend Image"
                     sh 'whoami'
                     sh "docker build -t wanderlust-backend:${VERSION} ."
                     echo "Build Successful"
                 }
-                dir('frontend'){
+                dir('frontend') {
                     echo "Building Frontend Image"
                     sh "docker build -t wanderlust-frontend:${VERSION} ."
                     echo "Build Successful"
@@ -81,32 +82,28 @@ pipeline {
         }
         stage("Docker Push") {
             steps {
-                
                 withCredentials([usernamePassword(credentialsId: "dockerHubCreds", passwordVariable: "dockerHubPass", usernameVariable: "dockerHubUser")]) {
-
-                    echo "Pushing Frontend"
                     sh "echo ${env.dockerHubPass} | docker login -u ${env.dockerHubUser} --password-stdin"
+                    
+                    echo "Pushing Frontend"
                     sh "docker tag wanderlust-frontend:${VERSION} ${env.dockerHubUser}/wanderlust-frontend:${VERSION}"
                     sh "docker push ${env.dockerHubUser}/wanderlust-frontend:${VERSION}"
                     echo "Pushed Frontend"
 
                     echo "Pushing Backend"
-                    sh "echo ${env.dockerHubPass} | docker login -u ${env.dockerHubUser} --password-stdin"
                     sh "docker tag wanderlust-backend:${VERSION} ${env.dockerHubUser}/wanderlust-backend:${VERSION}"
                     sh "docker push ${env.dockerHubUser}/wanderlust-backend:${VERSION}"
                     echo "Pushed Backend"
+                }
+            }
         }
-        
     }
-}
-     post{
-        success{
+    post {
+        success {
             archiveArtifacts artifacts: '*.xml', followSymlinks: false
             build job: "wanderlust-cd", parameters: [
                 string(name: 'VERSION', value: "${VERSION}")
             ]
         }
-     }
-        
     }
 }
