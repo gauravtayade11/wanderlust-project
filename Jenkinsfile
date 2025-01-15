@@ -1,5 +1,8 @@
 pipeline {
     agent any
+    tools {
+        nodejs 'NodeJS' // Ensure you have configured NodeJS in Jenkins Global Tool Configuration
+    }
     
     environment {
         scannerHome = tool 'SonarQube' // the name you have given the Sonar Scanner (in Global Tool Configuration)
@@ -13,7 +16,7 @@ pipeline {
         stage('Git: Checkout') {
             steps {
                 echo "Cloning git repo"
-                git url: "https://github.com/gauravtayade11/wanderlust-project.git", branch: "1.0.x"
+                checkout scm
                 echo "Cloning Successful"
             }
         }
