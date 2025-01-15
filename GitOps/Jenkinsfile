@@ -1,0 +1,17 @@
+pipeline {
+    agent any
+    parameters {
+        string(name: 'VERSION', defaultValue: '', description: 'Version for Docker images')
+    }
+
+    stages{
+        stage("Git Checkout"){
+            steps{
+                echo "Cloning Repo"
+                checkout scm
+                echo "${VERSION}"
+                echo "Cloning Successfull"
+            }
+        }
+    }
+}

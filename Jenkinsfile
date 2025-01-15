@@ -6,6 +6,7 @@ pipeline {
     
     environment {
         scannerHome = tool 'SonarQube' // the name you have given the Sonar Scanner (in Global Tool Configuration)
+        VERSION = "v2.${BUILD_NUMBER}"
     }
     stages {
         stage("Cleanup") {
@@ -63,40 +64,49 @@ pipeline {
                 // }
             }
         }
-//         stage("Docker Build"){
-//             steps{
-//                 dir('backend'){
-//                     echo "Building Backend Image"
-//                     sh 'whoami'
-//                     sh "docker build -t wanderlust-backend:${params.VERSION} ."
-//                     echo "Build Successful"
-//                 }
-//                 dir('frontend'){
-//                     echo "Building Frontend Image"
-//                     sh "docker build -t wanderlust-frontend:${params.VERSION} ."
-//                     echo "Build Successful"
-//                 }
-//             }
-//         }
-//         stage("Docker Push") {
-//             steps {
-//                 echo "Pushing Frontend"
-//                 withCredentials([usernamePassword(credentialsId: "dockerHubCreds", passwordVariable: "dockerHubPass", usernameVariable: "dockerHubUser")]) {
-//                     sh "echo ${env.dockerHubPass} | docker login -u ${env.dockerHubUser} --password-stdin"
-//                     sh "docker tag wanderlust-frontend:${VERSION} ${env.dockerHubUser}/wanderlust-frontend:${VERSION}"
-//                     h "docker push ${env.dockerHubUser}/wanderlust-frontend:${VERSION}"
-//         }
-//         echo "Pushed Frontend"
+        stage("Docker Build"){
+            steps{
+                dir('backend'){
+                    echo "Building Backend Image"
+                    sh 'whoami'
+                    sh "docker build -t wanderlust-backend:${VERSION} ."
+                    echo "Build Successful"
+                }
+                dir('frontend'){
+                    echo "Building Frontend Image"
+                    sh "docker build -t wanderlust-frontend:${VERSION} ."
+                    echo "Build Successful"
+                }
+            }
+        }
+        stage("Docker Push") {
+            steps {
+                
+                withCredentials([usernamePassword(credentialsId: "dockerHubCreds", passwordVariable: "dockerHubPass", usernameVariable: "dockerHubUser")]) {
 
-//         echo "Pushing Backend"
-//         withCredentials([usernamePassword(credentialsId: "dockerHubCreds", passwordVariable: "dockerHubPass", usernameVariable: "dockerHubUser")]) {
-//             sh "echo ${env.dockerHubPass} | docker login -u ${env.dockerHubUser} --password-stdin"
-//             sh "docker tag wanderlust-backend:${VERSION} ${env.dockerHubUser}/wanderlust-backend:${VERSION}"
-//             sh "docker push ${env.dockerHubUser}/wanderlust-backend:${VERSION}"
-//         }
-//         echo "Pushed Backend"
-//     }
-// }
+                    echo "Pushing Frontend"
+                    sh "echo ${env.dockerHubPass} | docker login -u ${env.dockerHubUser} --password-stdin"
+                    sh "docker tag wanderlust-frontend:${VERSION} ${env.dockerHubUser}/wanderlust-frontend:${VERSION}"
+                    sh "docker push ${env.dockerHubUser}/wanderlust-frontend:${VERSION}"
+                    echo "Pushed Frontend"
+
+                    echo "Pushing Backend"
+                    sh "echo ${env.dockerHubPass} | docker login -u ${env.dockerHubUser} --password-stdin"
+                    sh "docker tag wanderlust-backend:${VERSION} ${env.dockerHubUser}/wanderlust-backend:${VERSION}"
+                    sh "docker push ${env.dockerHubUser}/wanderlust-backend:${VERSION}"
+                    echo "Pushed Backend"
+        }
+        
+    }
+}
+     post{
+        success{
+            archiveArtifacts artifacts: '*.xml', followSymlinks: false
+            build job: "wanderlust-cd", parameters: [
+                string(name: 'VERSION', value: "${VERSION}")
+            ]
+        }
+     }
         
     }
 }
