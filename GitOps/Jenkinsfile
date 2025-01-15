@@ -18,12 +18,12 @@ pipeline {
                 script{
                     dir('kubernetes'){
                         sh """
-                        sed -i 's|image: wanderlust-backend:.*|image: wanderlust-backend:${params.VERSION}|' backend.yaml
+                        sed -i -e s/wanderlust-backend.*/wanderlust-backend:${params.VERSION}/g backend.yaml
                         """    
                     }
                     dir('kubernetes'){
                         sh """
-                        sed -i 's|image: wanderlust-frontend:.*|image: wanderlust-frontend:${params.VERSION}|' frontend.yaml
+                        sed -i -e s/wanderlust-frontend.*/wanderlust-frontend:${params.VERSION}/g frontend.yaml
                         """    
                     }
                 }
@@ -48,7 +48,7 @@ pipeline {
                         git commit -m "Updated environment variables"
                         
                         echo "Pushing changes to github: "
-                        git push 
+                        git push https://github.com/gauravtayade11/wanderlust-project.git 1.0.x
                     '''
                     }
                 }
