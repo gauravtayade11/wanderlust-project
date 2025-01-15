@@ -13,5 +13,42 @@ pipeline {
                 echo "Cloning Successfull"
             }
         }
+        stage("Update Manifest"){
+            steps{
+                script{
+                    dir('kubernetes'){
+                        sh """
+                        sed -i 's|image: wanderlust-backend:.*|image: wanderlust-backend:${params.VERSION}|' backend.yaml
+                        """    
+                    }
+                    dir('kubernetes'){
+                        sh """
+                        sed -i 's|image: wanderlust-frontend:.*|image: wanderlust-frontend:${params.VERSION}|' frontend.yaml
+                        """    
+                    }
+                }
+            }
+        }
+        stage("Git: Code update and push to GitHub"){
+            steps{
+                script{
+                    withCredentials([gitUsernamePassword(credentialsId: 'GitHub-cred', gitToolName: 'git-tool')]) {
+                        sh '''
+                        echo "Checking repository status: "
+                        git status
+                    
+                        echo "Adding changes to git: "
+                        git add .
+                        
+                        echo "Commiting changes: "
+                        git commit -m "Updated environment variables"
+                        
+                        echo "Pushing changes to github: "
+                        git push 
+                    '''
+                    }
+                }
+            }
+        }
     }
 }
