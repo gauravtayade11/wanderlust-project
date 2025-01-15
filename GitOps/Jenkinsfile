@@ -9,7 +9,7 @@ pipeline {
             steps{
                 echo "Cloning Repo"
                 checkout scm
-                echo "${VERSION}"
+                echo "${params.VERSION}"
                 echo "Cloning Successfull"
             }
         }
