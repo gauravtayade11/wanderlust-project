@@ -34,6 +34,10 @@ pipeline {
                 script{
                     withCredentials([gitUsernamePassword(credentialsId: 'GitHub-Creds', gitToolName: 'git-tool')]) {
                         sh '''
+                        echo "Configuring Git user"
+                        git config --global user.email "gauravtayade1192@gmail.com"
+                        git config --global user.name "Gaurav Tayade"
+
                         echo "Checking repository status: "
                         git status
                     
