@@ -48,7 +48,7 @@ pipeline {
                         git commit -m "Updated environment variables"
                         
                         echo "Pushing changes to github: "
-                        git push https://github.com/gauravtayade11/wanderlust-project.git 1.0.x
+                        git push origin 1.0.x
                     '''
                     }
                 }
