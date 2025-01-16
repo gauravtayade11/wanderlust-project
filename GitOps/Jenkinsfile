@@ -29,31 +29,30 @@ pipeline {
                 }
             }
         }
-        stage("Git: Code update and push to GitHub"){
-            steps{
-                script{
-                    withCredentials([gitUsernamePassword(credentialsId: 'GitHub-Creds',variable:'GITHUB_TOKEN' gitToolName: 'git-tool')]) {
-                        sh '''
-                        echo "Configuring Git user"
-                        git config --global user.email "gauravtayade1192@gmail.com"
-                        git config --global user.name "Gaurav Tayade"
+        stage("Git: Code update and push to GitHub") {
+    steps {
+        script {
+            withCredentials([usernamePassword(credentialsId: 'GitHub-Creds', usernameVariable: 'GITHUB_USER', passwordVariable: 'GITHUB_TOKEN')]) {
+                sh '''
+                echo "Configuring Git user"
+                git config --global user.email "gauravtayade1192@gmail.com"
+                git config --global user.name "Gaurav Tayade"
 
-                        echo "Checking repository status: "
-                        git status
-                    
-                        echo "Adding changes to git: "
-                        git add .
-                        
-                        echo "Commiting changes: "
-                        git commit -m "Updated environment variables"
-                        
-                        echo "Pushing changes to github: "
-                        // git push origin 1.0.x
-                        git push https://${GITHUB_TOKEN}@github.com/gauravtayade11/wanderlust-project HEAD:1.0.x
-                    '''
-                    }
-                }
+                echo "Checking repository status: "
+                git status
+            
+                echo "Adding changes to git: "
+                git add .
+                
+                echo "Committing changes: "
+                git commit -m "Updated environment variables"
+                
+                echo "Pushing changes to GitHub: "
+                git push https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/gauravtayade11/wanderlust-project HEAD:1.0.x
+                '''
             }
         }
+    }
+}
     }
 }
